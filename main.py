@@ -35,11 +35,27 @@ class Display:
         self.control_frame = ttk.Frame(self.waveform_frame)
         self.control_frame.grid(row=0, column=0, columnspan=6, sticky='w')
 
-        ttk.Label(self.control_frame, text="Waveform Type").grid(row=0, column=0, sticky='w')
+        ttk.Label(self.control_frame, text="Frequency").grid(row=1, column=1, sticky='w')
+        self.freq_var = tk.DoubleVar()
+        self.freq_entry = ttk.Entry(self.control_frame, textvariable=self.freq_var)
+        self.freq_entry.grid(row=2, column=1)
+
+        ttk.Label(self.control_frame, text="Amplitude").grid(row=1, column=2, sticky='w')
+        self.amp_var = tk.DoubleVar()
+        self.amp_entry = ttk.Entry(self.control_frame, textvariable=self.amp_var)
+        self.amp_entry.grid(row=2, column=2)
+
+        ttk.Label(self.control_frame, text="Phase").grid(row=1, column=3, sticky='w')
+        self.phase_var = tk.DoubleVar()
+        self.phase_entry = ttk.Entry(self.control_frame, textvariable=self.phase_var)
+        self.phase_entry.grid(row=2, column=3)
+
+        ttk.Label(self.control_frame, text="Waveform Type").grid(row=1, column=0, sticky='w')
         self.waveform_type_combobox = ttk.Combobox(self.control_frame, values=["Sine", "Square", "Sawtooth", "Triangle"], state="readonly")
-        self.waveform_type_combobox.grid(row=1, column=0)
-        self.waveform_type_combobox.current(0)  # optional: sets default to "Sine"
+        self.waveform_type_combobox.grid(row=2, column=0)
+        self.waveform_type_combobox.current(0)
         self.waveform_type_combobox.bind("<<ComboboxSelected>>", self.generate_waveform)
+
 
     #def setup_fourier_tab(self):
     
@@ -47,7 +63,7 @@ class Display:
 
 
     
-    def generate_waveform(self):
+    def generate_waveform(self, event = None):
         wave_type = self.waveform_type_combobox.get()
         
 
