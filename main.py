@@ -89,16 +89,29 @@ class Display:
         self.offset_entry.grid(row=3, column=4)
         self.offset_var.set(0)
 
-        self.pulse_widgets = {}
+        self.width_var = tk.DoubleVar()
+        self.position_var = tk.DoubleVar()
+        self.on_width_var = tk.DoubleVar()
+        self.t_start_var = tk.DoubleVar()
+        self.off_width_var = tk.DoubleVar()
+        self.n_osc_var = tk.IntVar()
 
-        labels = ["Width", "Position", "On Width", "T Start", "Off Width", "N Oscillations"]
-        for i, label in enumerate(labels):
-            lbl = ttk.Label(self.control_frame, text=label)
-            ent = ttk.Entry(self.control_frame)
-            self.pulse_widgets[label] = (lbl, ent)
+        pulse_labels = ["Width", "Position", "On Width", "T Start", "Off Width", "N Oscillations"]
+        pulse_vars = [self.width_var, self.position_var, self.on_width_var, self.t_start_var, self.off_width_var, self.n_osc_var]
+        self.pulse_entries = []
+
+        for i, (label, var) in enumerate(zip(pulse_labels, pulse_vars)):
+            ttk.Label(self.control_frame, text=label).grid(row=5 + i // 3, column=(i % 3) * 2, sticky='w')
+            entry = ttk.Entry(self.control_frame, textvariable=var, state='disabled')
+            entry.grid(row=5 + i // 3, column=(i % 3) * 2 + 1)
+            self.pulse_entries.append(entry)
 
         self.pulse_var = tk.BooleanVar()
         ttk.Checkbutton(self.control_frame, text="Pulse", variable=self.pulse_var, command=self.on_pulse_toggle).grid(row=4, column=0, sticky='w')
+
+        self.freq_change_var = tk.BooleanVar()
+        ttk.Checkbutton(self.control_frame, text="Frequency Change", variable=self.freq_change_var, command=self.on_freq_change_toggle).grid(row=3, column=5, sticky='w')
+
 
 
         self.dt_var.trace_add("write", lambda *args: self.update_from_dt())
@@ -157,26 +170,27 @@ class Display:
             self.waveform_type_combobox['values'] = ["Gaussian Envelope", "Square Envelope", "Square Train"]
             self.waveform_type_combobox.current(0)
 
-            self.freq_entry.config(state='disabled')
-            self.amp_entry.config(state='disabled')
-            self.phase_entry.config(state='disabled')
-            self.offset_entry.config(state='disabled')
+            #self.freq_entry.config(state='disabled')
+            #self.amp_entry.config(state='disabled')
+            #self.phase_entry.config(state='disabled')
+            #self.offset_entry.config(state='disabled')
 
-            for i, (label, (lbl, ent)) in enumerate(self.pulse_widgets.items()):
-                lbl.grid(row=5 + i // 3, column=(i % 3) * 2, sticky='w')
-                ent.grid(row=5 + i // 3, column=(i % 3) * 2 + 1)
-
+            for entry in self.pulse_entries:
+                entry.config(state='normal')
         else:
             self.waveform_type_combobox['values'] = ["Sine", "Square", "Sawtooth", "Triangle"]
-            self.waveform_type_combobox.current(0)    
+            self.waveform_type_combobox.current(0)
+
             self.freq_entry.config(state='normal')
             self.amp_entry.config(state='normal')
             self.phase_entry.config(state='normal')
             self.offset_entry.config(state='normal')
 
-            for lbl, ent in self.pulse_widgets.values():
-                lbl.grid_remove()
-                ent.grid_remove()
+            for entry in self.pulse_entries:
+                entry.config(state='disabled')
+    
+    def on_freq_change_toggle(self):
+        return
 
 if __name__ == "__main__":
     root = tk.Tk()
