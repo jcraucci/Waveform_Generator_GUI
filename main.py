@@ -83,6 +83,16 @@ class Display:
         self.phase_entry.grid(row=3, column=3)
         self.phase_var.set(0)
 
+        ttk.Label(self.control_frame, text="Offset").grid(row=2, column=4, sticky='w')
+        self.offset_var = tk.DoubleVar()
+        self.offset_entry = ttk.Entry(self.control_frame, textvariable=self.phase_var)
+        self.offset_entry.grid(row=3, column=4)
+        self.offset_var.set(0)
+
+        self.pulse_var = tk.BooleanVar()
+        ttk.Checkbutton(self.control_frame, text="Pulse", variable=self.pulse_var, command=self.on_pulse_toggle).grid(row=4, column=0, sticky='w')
+
+
         self.dt_var.trace_add("write", lambda *args: self.update_from_dt())
         self.steps_var.trace_add("write", lambda *args: self.update_from_steps())
         self.time_var.trace_add("write", lambda *args: self.update_from_total_time())
@@ -133,7 +143,15 @@ class Display:
             self.dt_var.set(dt)
         except:
             pass
-    
+
+    def on_pulse_toggle(self):
+        if self.pulse_var.get():
+            self.waveform_type_combobox['values'] = ["Gaussian Envelope", "Square Envelope", "Square Train"]
+            self.waveform_type_combobox.current(0)
+
+        else:
+            self.waveform_type_combobox['values'] = ["Sine", "Square", "Sawtooth", "Triangle"]
+            self.waveform_type_combobox.current(0)    
 
 if __name__ == "__main__":
     root = tk.Tk()
