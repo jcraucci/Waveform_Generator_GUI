@@ -89,6 +89,14 @@ class Display:
         self.offset_entry.grid(row=3, column=4)
         self.offset_var.set(0)
 
+        self.pulse_widgets = {}
+
+        labels = ["Width", "Position", "On Width", "T Start", "Off Width", "N Oscillations"]
+        for i, label in enumerate(labels):
+            lbl = ttk.Label(self.control_frame, text=label)
+            ent = ttk.Entry(self.control_frame)
+            self.pulse_widgets[label] = (lbl, ent)
+
         self.pulse_var = tk.BooleanVar()
         ttk.Checkbutton(self.control_frame, text="Pulse", variable=self.pulse_var, command=self.on_pulse_toggle).grid(row=4, column=0, sticky='w')
 
@@ -149,9 +157,26 @@ class Display:
             self.waveform_type_combobox['values'] = ["Gaussian Envelope", "Square Envelope", "Square Train"]
             self.waveform_type_combobox.current(0)
 
+            self.freq_entry.config(state='disabled')
+            self.amp_entry.config(state='disabled')
+            self.phase_entry.config(state='disabled')
+            self.offset_entry.config(state='disabled')
+
+            for i, (label, (lbl, ent)) in enumerate(self.pulse_widgets.items()):
+                lbl.grid(row=5 + i // 3, column=(i % 3) * 2, sticky='w')
+                ent.grid(row=5 + i // 3, column=(i % 3) * 2 + 1)
+
         else:
             self.waveform_type_combobox['values'] = ["Sine", "Square", "Sawtooth", "Triangle"]
             self.waveform_type_combobox.current(0)    
+            self.freq_entry.config(state='normal')
+            self.amp_entry.config(state='normal')
+            self.phase_entry.config(state='normal')
+            self.offset_entry.config(state='normal')
+
+            for lbl, ent in self.pulse_widgets.values():
+                lbl.grid_remove()
+                ent.grid_remove()
 
 if __name__ == "__main__":
     root = tk.Tk()
