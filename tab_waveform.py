@@ -41,8 +41,12 @@ class Waveform:
         self.time_var.trace_add("write", lambda *args: self.update_from_total_time())
         self.hz_var.trace_add("write", lambda *args: self.update_from_hz())
 
+        self.plot_button = ttk.Button(self.control_frame, text="Plot", command=self.plot_waveforms)
+        self.plot_button.grid(row=1, column=0, padx=5)
+
+
         # Top Row: Waveform type selection and Add button
-        ttk.Label(self.control_frame, text="Waveform Type").grid(row=1, column=0, sticky='w')
+        ttk.Label(self.control_frame, text="Waveform Type").grid(row=1, column=1, sticky='w')
         self.waveform_type_combobox = ttk.Combobox(
             self.control_frame,
             values=[
@@ -51,11 +55,11 @@ class Waveform:
             ],
             state="readonly"
         )
-        self.waveform_type_combobox.grid(row=1, column=1, padx=5, pady=5)
+        self.waveform_type_combobox.grid(row=1, column=2, padx=5, pady=5)
         self.waveform_type_combobox.current(0)
 
         self.add_button = ttk.Button(self.control_frame, text="Add", command=self.add_waveform_row)
-        self.add_button.grid(row=1, column=2, padx=5)
+        self.add_button.grid(row=1, column=3, padx=5)
 
         ttk.Label(self.control_frame, text="Envelope Type").grid(row=1, column=3, padx=5, sticky='w')
 
@@ -185,9 +189,16 @@ class Waveform:
 
             else:
                 var = tk.DoubleVar()
+
+                # Set initial values based on parameter name
+                if label in ["Frequency", "Amplitude", "On Width", "Off Width", "N Half Oscillations", "N Oscillations", "Width"]:
+                    var.set(1)
+                elif label in ["Phase", "Y Offset", "T Start"]:
+                    var.set(0)
                 entry = ttk.Entry(row_frame, textvariable=var, width=8)
                 entry.grid(row=0, column=2 + 2 * i, padx=2)
                 entry_vars.append((label, var))
+
 
         delete_button = ttk.Button(row_frame, text="Delete", command=lambda: self.delete_row(row_frame))
 
@@ -248,3 +259,5 @@ class Waveform:
             self.dt_var.set(dt)
         except:
             pass
+    def plot_waveforms(self):
+        print("Plotting waveform(s)...")
