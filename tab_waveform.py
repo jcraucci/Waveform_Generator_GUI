@@ -41,7 +41,7 @@ class Waveform:
         self.time_var.trace_add("write", lambda *args: self.update_from_total_time())
         self.hz_var.trace_add("write", lambda *args: self.update_from_hz())
 
-        self.plot_button = ttk.Button(self.control_frame, text="Plot", command=self.plot_waveforms)
+        self.plot_button = ttk.Button(self.control_frame, text="Plot", command=self.plot_waveform)
         self.plot_button.grid(row=1, column=0, padx=5)
 
 
@@ -82,6 +82,11 @@ class Waveform:
         self.envelope_shift_label = ttk.Label(self.control_frame, text="Shift")
         self.envelope_shift_var = tk.DoubleVar()
         self.envelope_shift_entry = ttk.Entry(self.control_frame, textvariable=self.envelope_shift_var, width=8)
+
+        self.figure = plt.Figure(figsize=(6, 3), dpi=100)
+        self.ax = self.figure.add_subplot(111)
+        self.canvas = FigureCanvasTkAgg(self.figure, master=waveform_frame)
+        self.canvas.get_tk_widget().grid(row=2, column=0, columnspan=6, padx=10, pady=10)
 
         def update_envelope_fields(event=None):
             # Remove all widgets first
@@ -214,7 +219,9 @@ class Waveform:
         update_freq_fields()
         place_delete_button()
 
-        self.rows.append((waveform_type, entry_vars, row_frame))
+        param_dict = {"type": waveform_type, "params": dict(entry_vars)}
+        self.rows.append((param_dict, row_frame))
+
         self.row_count += 1
 
     def delete_row(self, row_frame):
@@ -259,11 +266,49 @@ class Waveform:
             self.dt_var.set(dt)
         except:
             pass
-    def plot_waveforms(self):
-           for waveform_type, entry_vars, row_frame in self.rows:
-            print(f"Waveform: {waveform_type}")
-            for label, var in entry_vars:
-                try:
-                    print(f"  {label}: {var.get()}")
-                except Exception as e:
-                    print(f"  {label}: <error getting value> ({e})")
+
+    def plot_waveform(self):
+        try:
+            steps = int(self.steps_var.get())
+            dt = float(self.dt_var.get())
+            t = np.linspace(0, steps * dt, steps)
+
+            total_y = np.zeros_like(t)
+
+            for waveform_data, _ in self.rows:
+                waveform_type = waveform_data["type"]
+                params = waveform_data["params"]
+
+                # Helper to safely get value from a parameter dictionary
+                def get(name, default=0.0):
+                    var = params.get(name)
+                    return var.get() if var else default
+
+                freq = get("Frequency", 1.0)
+                amp = get("Amplitude", 1.0)
+                phase = get("Phase", 0.0)
+                offset = get("Y Offset", 0.0)
+
+                if waveform_type == "Sine":
+                    y = amp * np.sin(2 * np.pi * freq * t + phase) + offset
+                elif waveform_type == "Square":
+                    y = amp * signal.square(2 * np.pi * freq * t + phase) + offset
+                elif waveform_type == "Sawtooth":
+                    y = amp * signal.sawtooth(2 * np.pi * freq * t + phase) + offset
+                elif waveform_type == "Triangle":
+                    y = amp * signal.sawtooth(2 * np.pi * freq * t + phase, width=0.5) + offset
+                else:
+                    y = np.zeros_like(t)
+
+                total_y += y
+
+            self.ax.clear()
+            self.ax.plot(t, total_y, label="Composite Waveform")
+            self.ax.set_title("Composite Waveform")
+            self.ax.set_xlabel("Time (s)")
+            self.ax.set_ylabel("Amplitude")
+            self.ax.legend()
+            self.canvas.draw()
+
+        except Exception as e:
+            print(f"Error while plotting: {e}")
