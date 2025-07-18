@@ -61,7 +61,7 @@ class Waveform:
         self.add_button = ttk.Button(self.control_frame, text="Add", command=self.add_waveform_row)
         self.add_button.grid(row=1, column=3, padx=5)
 
-        ttk.Label(self.control_frame, text="Envelope Type").grid(row=1, column=3, padx=5, sticky='w')
+        ttk.Label(self.control_frame, text="Envelope Type").grid(row=1, column=4, padx=5, sticky='w')
 
         self.envelope_type_var = tk.StringVar()
         self.envelope_type_combobox = ttk.Combobox(
@@ -71,7 +71,7 @@ class Waveform:
             state="readonly",
             width=10
         )
-        self.envelope_type_combobox.grid(row=1, column=4, padx=5)
+        self.envelope_type_combobox.grid(row=1, column=5, padx=5)
         self.envelope_type_combobox.current(0)
 
         # Create but don't place the widgets yet
@@ -93,10 +93,10 @@ class Waveform:
             envelope_type = self.envelope_type_var.get()
             if envelope_type != "None":
                 # Place the labels and entries to the right of the combobox (col 4)
-                self.envelope_width_label.grid(row=1, column=5, padx=2)
-                self.envelope_width_entry.grid(row=1, column=6, padx=2)
-                self.envelope_shift_label.grid(row=1, column=7, padx=2)
-                self.envelope_shift_entry.grid(row=1, column=8, padx=2)
+                self.envelope_width_label.grid(row=1, column=6, padx=2)
+                self.envelope_width_entry.grid(row=1, column=7, padx=2)
+                self.envelope_shift_label.grid(row=1, column=8, padx=2)
+                self.envelope_shift_entry.grid(row=1, column=9, padx=2)
 
         self.envelope_type_combobox.bind("<<ComboboxSelected>>", update_envelope_fields)
         update_envelope_fields()  # initialize
@@ -260,4 +260,10 @@ class Waveform:
         except:
             pass
     def plot_waveforms(self):
-        print("Plotting waveform(s)...")
+           for waveform_type, entry_vars, row_frame in self.rows:
+            print(f"Waveform: {waveform_type}")
+            for label, var in entry_vars:
+                try:
+                    print(f"  {label}: {var.get()}")
+                except Exception as e:
+                    print(f"  {label}: <error getting value> ({e})")
